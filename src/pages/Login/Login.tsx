@@ -1,7 +1,15 @@
 import { useState } from "react";
 import { FiEye, FiEyeOff, FiLock, FiMail } from "react-icons/fi";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { login } from "../../store/auth/authSlice";
+import { users } from "../../utils";
+import {message} from "antd"
 
 const Login = () => {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
@@ -20,13 +28,37 @@ const Login = () => {
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    console.log("Login Data:", {
-      ...formData,
-      rememberMe,
-    });
-  };
+  const user = users.find(
+    (item) =>
+      item.email.toLowerCase() === formData.email.toLowerCase() &&
+      item.password === formData.password
+  );
+
+  if (!user) {
+    message.error("Invalid email or password");
+    return;
+  }
+
+  const { password, ...userData } = user;
+
+  const token = `mock-token-${user.id}`;
+
+  dispatch(
+    login({
+      user: userData,
+      token,
+    })
+  );
+
+  if (rememberMe) {
+    localStorage.setItem("user", JSON.stringify(userData));
+    localStorage.setItem("token", token);
+  }
+
+  navigate("/dashboard");
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
