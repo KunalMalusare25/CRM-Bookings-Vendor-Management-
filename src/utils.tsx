@@ -48,6 +48,14 @@ export const sportOptions = [
   { value: "Tennis", label: "Tennis" },
 ];
 
+// VENDOR OPTIONS
+export const vendorStatus = [
+  {value: "All", label: "All Status"},
+  {value: "Active", label: "Active"},
+  {value: "Inactive", label: "Inactive"},
+  {value: "Pending Verification", label: "Pending Verification"},
+]
+
 export const getBookingDateTime = (date: string, slot: string) => {
   const [day, month, year] = date.split("/").map(Number);
 

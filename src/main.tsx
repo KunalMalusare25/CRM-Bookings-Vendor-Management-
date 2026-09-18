@@ -4,12 +4,15 @@ import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./store/store.ts";
+import { ThemeProvider } from "./context/ThemeContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <BrowserRouter>
-      <App />
-   </BrowserRouter>,
-  </Provider>
-  
+      <ThemeProvider>
+        <App />
+      </ThemeProvider>
+    </BrowserRouter>
+    ,
+  </Provider>,
 );

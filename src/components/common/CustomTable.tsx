@@ -1,4 +1,5 @@
 import { useEffect, useState, type ReactNode } from "react";
+import { useTheme } from "../../context/ThemeContext";
 
 export interface TableColumn<T> {
   key: string;
@@ -22,18 +23,29 @@ const CustomTable = <T,>({
   emptyText = "No records found.",
   itemsPerPage = 5,
 }: CustomTableProps<T>) => {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
+
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const totalPages = Math.ceil(
+    data.length / itemsPerPage,
+  );
 
   // Keep current page valid when
   // filters/search reduce the data.
   useEffect(() => {
-    if (totalPages > 0 && currentPage > totalPages) {
+    if (
+      totalPages > 0 &&
+      currentPage > totalPages
+    ) {
       setCurrentPage(totalPages);
     }
 
-    if (totalPages === 0 && currentPage !== 1) {
+    if (
+      totalPages === 0 &&
+      currentPage !== 1
+    ) {
       setCurrentPage(1);
     }
   }, [data.length, totalPages, currentPage]);
@@ -44,23 +56,47 @@ const CustomTable = <T,>({
   );
 
   const startIndex =
-    data.length === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+    data.length === 0
+      ? 0
+      : (currentPage - 1) * itemsPerPage + 1;
 
-  const endIndex = Math.min(currentPage * itemsPerPage, data.length);
+  const endIndex = Math.min(
+    currentPage * itemsPerPage,
+    data.length,
+  );
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div
+      className={`overflow-hidden rounded-2xl border shadow-sm ${
+        isDark
+          ? "border-slate-800 bg-slate-900"
+          : "border-slate-200 bg-white"
+      }`}
+    >
+      {/* -------------------------------- */}
+      {/* Table */}
+      {/* -------------------------------- */}
+
       <div className="overflow-x-auto">
         <table className="w-full min-w-237.5">
           {/* Header */}
+
           <thead>
-            <tr className="border-b border-slate-200 bg-[#b9d1fd] ">
+            <tr
+              className={`border-b ${
+                isDark
+                  ? "border-slate-800 bg-slate-800/70"
+                  : "border-slate-200 bg-violet-50"
+              }`}
+            >
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-slate-900 ${
-                    column.className || ""
-                  }`}
+                  className={`px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider ${
+                    isDark
+                      ? "text-slate-300"
+                      : "text-slate-700"
+                  } ${column.className || ""}`}
                 >
                   {column.title}
                 </th>
@@ -70,32 +106,80 @@ const CustomTable = <T,>({
 
           {/* Body */}
 
-          <tbody className="divide-y divide-slate-100">
+          <tbody
+            className={`divide-y ${
+              isDark
+                ? "divide-slate-800"
+                : "divide-slate-100"
+            }`}
+          >
             {paginatedData.length > 0 ? (
-              paginatedData.map((item, index) => (
-                <tr
-                  key={index}
-                  onClick={() => onRowClick?.(item)}
-                  className={`transition ${
-                    onRowClick ? "cursor-pointer hover:bg-indigo-50/40" : ""
-                  }`}
-                >
-                  {columns.map((column) => (
-                    <td key={column.key} className="px-5 py-4">
-                      {column.render
-                        ? column.render(item, index)
-                        : String(item[column.key as keyof T] ?? "")}
-                    </td>
-                  ))}
-                </tr>
-              ))
+              paginatedData.map(
+                (item, index) => (
+                  <tr
+                    key={index}
+                    onClick={() =>
+                      onRowClick?.(item)
+                    }
+                    className={`transition-colors ${
+                      onRowClick
+                        ? isDark
+                          ? "cursor-pointer hover:bg-slate-800/60"
+                          : "cursor-pointer hover:bg-violet-50/40"
+                        : ""
+                    }`}
+                  >
+                    {columns.map(
+                      (column) => (
+                        <td
+                          key={column.key}
+                          className={`px-5 py-4 ${
+                            isDark
+                              ? "text-slate-300"
+                              : "text-slate-700"
+                          }`}
+                        >
+                          {column.render
+                            ? column.render(
+                                item,
+                                index,
+                              )
+                            : String(
+                                item[
+                                  column.key as keyof T
+                                ] ?? "",
+                              )}
+                        </td>
+                      ),
+                    )}
+                  </tr>
+                ),
+              )
             ) : (
               <tr>
-                <td colSpan={columns.length} className="px-5 py-16 text-center">
-                  <p className="font-semibold text-slate-700">{emptyText}</p>
+                <td
+                  colSpan={columns.length}
+                  className="px-5 py-16 text-center"
+                >
+                  <p
+                    className={`font-semibold ${
+                      isDark
+                        ? "text-slate-200"
+                        : "text-slate-700"
+                    }`}
+                  >
+                    {emptyText}
+                  </p>
 
-                  <p className="mt-1 text-sm text-slate-400">
-                    Try changing your search or filters.
+                  <p
+                    className={`mt-1 text-sm ${
+                      isDark
+                        ? "text-slate-500"
+                        : "text-slate-400"
+                    }`}
+                  >
+                    Try changing your search
+                    or filters.
                   </p>
                 </td>
               </tr>
@@ -104,17 +188,61 @@ const CustomTable = <T,>({
         </table>
       </div>
 
-      {/* pagination  */}
+      {/* -------------------------------- */}
+      {/* Pagination */}
+      {/* -------------------------------- */}
+
       {data.length > 0 && (
-        <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm text-slate-500">
+        <div
+          className={`flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between ${
+            isDark
+              ? "border-slate-800"
+              : "border-slate-200"
+          }`}
+        >
+          {/* Records Count */}
+
+          <p
+            className={`text-sm ${
+              isDark
+                ? "text-slate-400"
+                : "text-slate-500"
+            }`}
+          >
             Showing{" "}
-            <span className="font-semibold text-slate-700">{startIndex}</span>{" "}
-            to <span className="font-semibold text-slate-700">{endIndex}</span>{" "}
+            <span
+              className={`font-semibold ${
+                isDark
+                  ? "text-slate-200"
+                  : "text-slate-700"
+              }`}
+            >
+              {startIndex}
+            </span>{" "}
+            to{" "}
+            <span
+              className={`font-semibold ${
+                isDark
+                  ? "text-slate-200"
+                  : "text-slate-700"
+              }`}
+            >
+              {endIndex}
+            </span>{" "}
             of{" "}
-            <span className="font-semibold text-slate-700">{data.length}</span>{" "}
+            <span
+              className={`font-semibold ${
+                isDark
+                  ? "text-slate-200"
+                  : "text-slate-700"
+              }`}
+            >
+              {data.length}
+            </span>{" "}
             records
           </p>
+
+          {/* Pagination Buttons */}
 
           <div className="flex items-center gap-2">
             {/* Previous */}
@@ -122,40 +250,63 @@ const CustomTable = <T,>({
             <button
               type="button"
               disabled={currentPage === 1}
-              onClick={() => setCurrentPage((page) => page - 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-40"
+              onClick={() =>
+                setCurrentPage(
+                  (page) => page - 1,
+                )
+              }
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition ${
+                isDark
+                  ? "border-slate-700 text-slate-400 hover:border-violet-500/40 hover:bg-violet-500/10 hover:text-violet-400"
+                  : "border-slate-200 text-slate-500 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-600"
+              } disabled:cursor-not-allowed disabled:opacity-40`}
             >
-              <span className="text-lg">‹</span>
+              ‹
             </button>
 
             {/* Page Numbers */}
 
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map(
-              (page) => (
-                <button
-                  key={page}
-                  type="button"
-                  onClick={() => setCurrentPage(page)}
-                  className={`h-9 w-9 rounded-lg text-sm font-semibold transition ${
-                    currentPage === page
-                      ? "bg-indigo-600 text-white shadow-sm"
-                      : "border border-slate-200 text-slate-600 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                  }`}
-                >
-                  {page}
-                </button>
-              ),
-            )}
+            {Array.from(
+              { length: totalPages },
+              (_, index) => index + 1,
+            ).map((page) => (
+              <button
+                key={page}
+                type="button"
+                onClick={() =>
+                  setCurrentPage(page)
+                }
+                className={`h-9 w-9 rounded-lg text-sm font-semibold transition ${
+                  currentPage === page
+                    ? "bg-violet-600 text-white shadow-sm"
+                    : isDark
+                      ? "border border-slate-700 text-slate-400 hover:border-violet-500/40 hover:bg-violet-500/10 hover:text-violet-400"
+                      : "border border-slate-200 text-slate-600 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-600"
+                }`}
+              >
+                {page}
+              </button>
+            ))}
 
             {/* Next */}
 
             <button
               type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage((page) => page + 1)}
-              className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600 disabled:cursor-not-allowed disabled:opacity-40"
+              disabled={
+                currentPage === totalPages
+              }
+              onClick={() =>
+                setCurrentPage(
+                  (page) => page + 1,
+                )
+              }
+              className={`flex h-9 w-9 items-center justify-center rounded-lg border text-lg transition ${
+                isDark
+                  ? "border-slate-700 text-slate-400 hover:border-violet-500/40 hover:bg-violet-500/10 hover:text-violet-400"
+                  : "border-slate-200 text-slate-500 hover:border-violet-200 hover:bg-violet-50 hover:text-violet-600"
+              } disabled:cursor-not-allowed disabled:opacity-40`}
             >
-              <span className="text-lg">›</span>
+              ›
             </button>
           </div>
         </div>

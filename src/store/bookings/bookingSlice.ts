@@ -1,7 +1,5 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-
 import type { Booking, BookingStatus } from "../../data/bookings";
-
 import { bookings } from "../../data/bookings";
 
 interface BookingState {
