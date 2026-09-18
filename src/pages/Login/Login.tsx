@@ -28,37 +28,33 @@ const Login = () => {
   };
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  const user = users.find(
-    (item) =>
-      item.email.toLowerCase() === formData.email.toLowerCase() &&
-      item.password === formData.password
-  );
+    const user = users.find(
+      (item) =>
+        item.email.toLowerCase() === formData.email.toLowerCase() &&
+        item.password === formData.password,
+    );
 
-  if (!user) {
-    message.error("Invalid email or password");
-    return;
-  }
+    if (!user) {
+      message.error("Invalid email or password");
+      return;
+    }
 
-  const { password, ...userData } = user;
+    const { password, ...userData } = user;
 
-  const token = `mock-token-${user.id}`;
+    const token = `mock-token-${user.id}`;
 
-  dispatch(
-    login({
-      user: userData,
-      token,
-    })
-  );
+    dispatch(
+      login({
+        user: userData,
+        token,
+      }),
+    );
 
-  if (rememberMe) {
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", token);
-  }
-
-  navigate("/dashboard");
-};
+    message.success(`Welcome back, ${user.name}`);
+    navigate("/dashboard");
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
@@ -320,26 +316,8 @@ const Login = () => {
                   </div>
                 </div>
 
-                {/* Remember + Forgot */}
-                <div className="flex items-center justify-between">
-                  <label className="flex cursor-pointer select-none items-center gap-2">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="
-                        h-4
-                        w-4
-                        rounded
-                        border-slate-300
-                        accent-indigo-600
-                        focus:ring-indigo-500
-                      "
-                    />
-
-                    <span className="text-sm text-slate-500">Remember me</span>
-                  </label>
-
+                {/* Forgot Password*/}
+                <div className="flex items-end justify-end">
                   <button
                     type="button"
                     className="

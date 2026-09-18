@@ -1,109 +1,111 @@
 import {
   FiCalendar,
   FiDollarSign,
-  FiUsers,
   FiMapPin,
   FiArrowUpRight,
   FiMoreHorizontal,
 } from "react-icons/fi";
 
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../store/store";
 
-const stats = [
-  {
-    title: "Total Bookings",
-    value: "1,248",
-    change: "+12.5%",
-    description: "vs. last month",
-    icon: FiCalendar,
-    positive: true,
-  },
-  {
-    title: "Total Revenue",
-    value: "₹4,82,500",
-    change: "+8.2%",
-    description: "vs. last month",
-    icon: FiDollarSign,
-    positive: true,
-  },
-  {
-    title: "Active Vendors",
-    value: "86",
-    change: "+4.3%",
-    description: "vs. last month",
-    icon: FiMapPin,
-    positive: true,
-  },
-  {
-    title: "Registered Users",
-    value: "2,845",
-    change: "+10.1%",
-    description: "vs. last month",
-    icon: FiUsers,
-    positive: true,
-  },
-];
-
-const recentBookings = [
-  {
-    id: "BK-1024",
-    user: "Rahul Sharma",
-    initials: "RS",
-    venue: "Elite Sports Arena",
-    sport: "Football",
-    date: "18 Sep 2026",
-    amount: "₹1,200",
-    status: "Confirmed",
-  },
-  {
-    id: "BK-1023",
-    user: "Amit Patil",
-    initials: "AP",
-    venue: "Smash Zone",
-    sport: "Badminton",
-    date: "18 Sep 2026",
-    amount: "₹800",
-    status: "Pending",
-  },
-  {
-    id: "BK-1022",
-    user: "Kunal Mehta",
-    initials: "KM",
-    venue: "Pro Cricket Ground",
-    sport: "Cricket",
-    date: "17 Sep 2026",
-    amount: "₹2,500",
-    status: "Confirmed",
-  },
-  {
-    id: "BK-1021",
-    user: "Sneha Joshi",
-    initials: "SJ",
-    venue: "Ace Tennis Club",
-    sport: "Tennis",
-    date: "17 Sep 2026",
-    amount: "₹1,000",
-    status: "Cancelled",
-  },
-];
-
 const Dashboard = () => {
-  const { user } = useSelector(
-    (state: RootState) => state.auth
+  const { user } = useSelector((state: RootState) => state.auth);
+  const bookings = useSelector((state: RootState) => state.bookings.items);
+
+  // Booking calculations
+  const totalBookings = bookings.length;
+  const totalRevenue = bookings.reduce(
+    (total, booking) => total + Number(booking.amount || 0),
+    0,
   );
+  const confirmedBookings = bookings.filter(
+    (booking) => booking.status === "Confirmed",
+  ).length;
+  const pendingBookings = bookings.filter(
+    (booking) => booking.status === "Pending",
+  ).length;
+  const cancelledBookings = bookings.filter(
+    (booking) => booking.status === "Cancelled",
+  ).length;
+
+  const getPercentage = (count: number) => {
+    if (totalBookings === 0) return 0;
+
+    return Math.round((count / totalBookings) * 100);
+  };
+
+  const confirmedPercentage = getPercentage(confirmedBookings);
+  const pendingPercentage = getPercentage(pendingBookings);
+  const cancelledPercentage = getPercentage(cancelledBookings);
+
+  // Recent bookings
+  const recentBookings = [...bookings]
+    .sort((a, b) => {
+      const dateA = new Date(`${a.date}T${a.slot}`).getTime();
+      const dateB = new Date(`${b.date}T${b.slot}`).getTime();
+
+      return dateB - dateA;
+    })
+    .slice(0, 5);
+
+  // Dashboard stats
+  const stats = [
+    {
+      title: "Total Bookings",
+      value: totalBookings.toLocaleString(),
+      change: "",
+      description: "All bookings",
+      icon: FiCalendar,
+    },
+    {
+      title: "Total Revenue",
+      value: `₹${totalRevenue.toLocaleString("en-IN")}`,
+      change: "",
+      description: "Total booking revenue",
+      icon: FiDollarSign,
+    },
+    {
+      title: "Active Vendors",
+      value: "86",
+      change: "",
+      description: "Currently active",
+      icon: FiMapPin,
+    },
+  ];
+
+  // Page date
+  const today = new Date();
+
+  const formattedToday = today.toLocaleDateString("en-IN", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+
+  // chart
+  const confirmedDegree = confirmedPercentage * 3.6;
+  const pendingDegree = confirmedDegree + pendingPercentage * 3.6;
+  const donutBackground =
+    totalBookings === 0
+      ? "#e2e8f0"
+      : `conic-gradient(
+          #6366f1 0deg ${confirmedDegree}deg,
+          #f59e0b ${confirmedDegree}deg ${pendingDegree}deg,
+          #e2e8f0 ${pendingDegree}deg 360deg
+        )`;
 
   return (
     <div className="mx-auto w-full max-w-[1600px] space-y-7">
       {/* Page heading */}
       <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
         <div>
-          <p className="text-sm font-medium text-slate-400">
-            Thursday, 17 September 2026
-          </p>
+          <p className="text-sm font-medium text-slate-400">{formattedToday}</p>
 
           <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
-            Good evening, {user?.name?.split(" ")[0]}.
+            Good evening, {user?.name?.split(" ")[0] || "there"}.
           </h1>
 
           <p className="mt-2 text-sm text-slate-500">
@@ -112,18 +114,17 @@ const Dashboard = () => {
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm hover:bg-slate-50">
+          <button
+            type="button"
+            className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl bg-blue-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800"
+          >
             Export Report
-          </button>
-
-          <button className="rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
-            + New Booking
           </button>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
 
@@ -137,7 +138,10 @@ const Dashboard = () => {
                   <Icon size={20} />
                 </div>
 
-                <button className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-50">
+                <button
+                  type="button"
+                  className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-50"
+                >
                   <FiMoreHorizontal size={18} />
                 </button>
               </div>
@@ -151,23 +155,23 @@ const Dashboard = () => {
                   {stat.value}
                 </h2>
 
-                <span className="mb-1 flex items-center gap-1 text-xs font-bold text-emerald-600">
-                  <FiArrowUpRight size={14} />
-                  {stat.change}
-                </span>
+                {stat.change && (
+                  <span className="mb-1 flex items-center gap-1 text-xs font-bold text-emerald-600">
+                    <FiArrowUpRight size={14} />
+                    {stat.change}
+                  </span>
+                )}
               </div>
 
-              <p className="mt-1 text-xs text-slate-400">
-                {stat.description}
-              </p>
+              <p className="mt-1 text-xs text-slate-400">{stat.description}</p>
             </div>
           );
         })}
       </div>
 
-      {/* Charts and quick overview */}
-      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1.6fr)_minmax(280px,1fr)]">
-        {/* Activity chart */}
+      {/* Charts and overview */}
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,2fr)_minmax(280px,1fr)]">
+        {/* Booking activity */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
           <div className="flex items-start justify-between">
             <div>
@@ -176,25 +180,29 @@ const Dashboard = () => {
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Booking volume over the last 7 days
+                Booking volume overview
               </p>
             </div>
 
-            <select className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-500 outline-none">
-              <option>Last 7 days</option>
-              <option>Last 30 days</option>
+            <select
+              defaultValue="7"
+              className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-slate-500 outline-none"
+            >
+              <option value="7">Last 7 days</option>
+              <option value="30">Last 30 days</option>
             </select>
           </div>
 
+          {/* Simple booking visualization */}
           <div className="mt-8 flex h-48 items-end gap-2 sm:gap-4">
             {[
-              { day: "Mon", height: "45%" },
-              { day: "Tue", height: "65%" },
-              { day: "Wed", height: "52%" },
-              { day: "Thu", height: "80%" },
-              { day: "Fri", height: "68%" },
-              { day: "Sat", height: "94%" },
-              { day: "Sun", height: "72%" },
+              { day: "Mon", value: 45 },
+              { day: "Tue", value: 65 },
+              { day: "Wed", value: 52 },
+              { day: "Thu", value: 80 },
+              { day: "Fri", value: 68 },
+              { day: "Sat", value: 94 },
+              { day: "Sun", value: 72 },
             ].map((item) => (
               <div
                 key={item.day}
@@ -203,7 +211,9 @@ const Dashboard = () => {
                 <div className="flex h-40 w-full items-end justify-center rounded-lg bg-slate-50">
                   <div
                     className="w-full max-w-10 rounded-t-lg bg-indigo-500 transition-all hover:bg-indigo-600"
-                    style={{ height: item.height }}
+                    style={{
+                      height: `${item.value}%`,
+                    }}
                   />
                 </div>
 
@@ -217,60 +227,69 @@ const Dashboard = () => {
 
         {/* Booking status */}
         <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
-          <h2 className="text-base font-bold text-slate-900">
-            Booking status
-          </h2>
+          <h2 className="text-base font-bold text-slate-900">Booking status</h2>
 
           <p className="mt-1 text-sm text-slate-500">
             Current booking distribution
           </p>
 
+          {/* Donut */}
           <div className="mt-7 flex items-center justify-center">
             <div
               className="flex h-44 w-44 items-center justify-center rounded-full"
               style={{
-                background:
-                  "conic-gradient(#6366f1 0deg 230deg, #f59e0b 230deg 300deg, #e2e8f0 300deg 360deg)",
+                background: donutBackground,
               }}
             >
               <div className="flex h-32 w-32 flex-col items-center justify-center rounded-full bg-white">
                 <span className="text-3xl font-bold text-slate-900">
-                  1,248
+                  {totalBookings.toLocaleString()}
                 </span>
 
-                <span className="text-xs text-slate-400">
-                  Total bookings
-                </span>
+                <span className="text-xs text-slate-400">Total bookings</span>
               </div>
             </div>
           </div>
 
+          {/* Status percentages */}
           <div className="mt-7 space-y-4">
+            {/* Confirmed */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+
                 <span className="text-slate-500">Confirmed</span>
               </div>
 
-              <span className="font-bold text-slate-800">64%</span>
+              <span className="font-bold text-slate-800">
+                {confirmedPercentage}%
+              </span>
             </div>
 
+            {/* Pending */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+
                 <span className="text-slate-500">Pending</span>
               </div>
 
-              <span className="font-bold text-slate-800">19%</span>
+              <span className="font-bold text-slate-800">
+                {pendingPercentage}%
+              </span>
             </div>
 
+            {/* Cancelled */}
             <div className="flex items-center justify-between text-sm">
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+
                 <span className="text-slate-500">Cancelled</span>
               </div>
 
-              <span className="font-bold text-slate-800">17%</span>
+              <span className="font-bold text-slate-800">
+                {cancelledPercentage}%
+              </span>
             </div>
           </div>
         </div>
@@ -289,12 +308,12 @@ const Dashboard = () => {
             </p>
           </div>
 
-          <a
-            href="/bookings"
-            className="text-sm font-bold text-indigo-600 hover:text-indigo-700"
+          <Link
+            to="/bookings"
+            className="text-sm font-bold text-indigo-600 transition hover:text-indigo-700"
           >
             View all bookings →
-          </a>
+          </Link>
         </div>
 
         <div className="overflow-x-auto">
@@ -312,58 +331,100 @@ const Dashboard = () => {
             </thead>
 
             <tbody className="divide-y divide-slate-100">
-              {recentBookings.map((booking) => (
-                <tr
-                  key={booking.id}
-                  className="text-sm transition-colors hover:bg-slate-50"
-                >
-                  <td className="px-6 py-4 font-bold text-slate-800">
-                    {booking.id}
-                  </td>
+              {recentBookings.length > 0 ? (
+                recentBookings.map((booking) => (
+                  <tr
+                    key={booking.id}
+                    className="text-sm transition-colors hover:bg-slate-50"
+                  >
+                    {/* Booking ID */}
+                    <td className="px-6 py-4 font-bold text-slate-800">
+                      {booking.id}
+                    </td>
 
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-600">
-                        {booking.initials}
+                    {/* User */}
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-[10px] font-bold text-indigo-600">
+                          {booking.userName
+                            .split(" ")
+                            .map((name) => name[0])
+                            .join("")
+                            .slice(0, 2)
+                            .toUpperCase()}
+                        </div>
+
+                        <div>
+                          <p className="whitespace-nowrap font-medium text-slate-700">
+                            {booking.userName}
+                          </p>
+
+                          <p className="text-xs text-slate-400">
+                            {booking.userEmail}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Venue */}
+                    <td className="whitespace-nowrap px-6 py-4 text-slate-500">
+                      {booking.venueName}
+                    </td>
+
+                    {/* Sport */}
+                    <td className="px-6 py-4 text-slate-500">
+                      {booking.sport}
+                    </td>
+
+                    {/* Date */}
+                    <td className="whitespace-nowrap px-6 py-4 text-slate-500">
+                      {new Date(booking.date).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric",
+                      })}
+                    </td>
+
+                    {/* Amount */}
+                    <td className="px-6 py-4 font-semibold text-slate-800">
+                      ₹{Number(booking.amount).toLocaleString("en-IN")}
+                    </td>
+
+                    {/* Status */}
+                    <td className="px-6 py-4">
+                      <span
+                        className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
+                          booking.status === "Confirmed"
+                            ? "bg-emerald-50 text-emerald-700"
+                            : booking.status === "Pending"
+                              ? "bg-amber-50 text-amber-700"
+                              : "bg-red-50 text-red-600"
+                        }`}
+                      >
+                        {booking.status}
+                      </span>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={7} className="px-6 py-12 text-center">
+                    <div className="flex flex-col items-center justify-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <FiCalendar size={22} />
                       </div>
 
-                      <span className="whitespace-nowrap font-medium text-slate-700">
-                        {booking.user}
-                      </span>
+                      <p className="mt-3 text-sm font-semibold text-slate-700">
+                        No bookings found
+                      </p>
+
+                      <p className="mt-1 text-xs text-slate-400">
+                        Recent bookings will appear here.
+                      </p>
                     </div>
                   </td>
-
-                  <td className="whitespace-nowrap px-6 py-4 text-slate-500">
-                    {booking.venue}
-                  </td>
-
-                  <td className="px-6 py-4 text-slate-500">
-                    {booking.sport}
-                  </td>
-
-                  <td className="whitespace-nowrap px-6 py-4 text-slate-500">
-                    {booking.date}
-                  </td>
-
-                  <td className="px-6 py-4 font-semibold text-slate-800">
-                    {booking.amount}
-                  </td>
-
-                  <td className="px-6 py-4">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-bold ${
-                        booking.status === "Confirmed"
-                          ? "bg-emerald-50 text-emerald-700"
-                          : booking.status === "Pending"
-                            ? "bg-amber-50 text-amber-700"
-                            : "bg-red-50 text-red-600"
-                      }`}
-                    >
-                      {booking.status}
-                    </span>
-                  </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
