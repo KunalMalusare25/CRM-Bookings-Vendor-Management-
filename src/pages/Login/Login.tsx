@@ -57,9 +57,9 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-5xl">
-        <div className="relative overflow-hidden grid grid-cols-1 md:grid-cols-2 min-h-140 rounded-3xl border border-slate-300 bg-white shadow-xl shadow-slate-200/50">
+        <div className="relative grid grid-cols-1 overflow-hidden rounded-3xl border border-slate-300 bg-white shadow-xl shadow-slate-200/50 md:min-h-140 md:grid-cols-2">
           {/* LEFT SIDE */}
-          <section className="relative overflow-hidden bg-[#b9d1fd] p-8 md:p-12">
+          <section className="relative min-h-105 overflow-hidden bg-[#b9d1fd] p-8 md:min-h-140 md:p-12">
             {/* Animated Background Circle 1 */}
             <div
               className="
@@ -116,7 +116,8 @@ const Login = () => {
               className="
                 relative
                 z-10
-                mt-28
+                mt-16
+                md:mt-28
                 max-w-md
                 animate-[contentIn_0.8s_0.12s_both_ease-out]
               "
@@ -139,19 +140,26 @@ const Login = () => {
             <div
               className="
                 absolute
-                bottom-9
-                right-8
+                bottom-5
+                right-5
                 z-20
-                w-64
+                w-52
                 rounded-2xl
                 border
                 border-white/80
                 bg-white/80
-                p-5
+                p-4
                 shadow-xl
                 shadow-slate-300/30
                 backdrop-blur-xl
                 animate-[dashboardFloat_6s_ease-in-out_infinite]
+                sm:w-56
+                sm:bottom-7
+                sm:right-7
+                md:bottom-9
+                md:right-8
+                md:w-64
+                md:p-5
               "
             >
               <div className="mb-5 flex items-center justify-between">
@@ -180,6 +188,7 @@ const Login = () => {
                 mx-auto
                 w-full
                 max-w-sm
+                py-2
                 animate-[formIn_0.75s_0.15s_both_ease-out]
               "
             >
@@ -313,7 +322,7 @@ const Login = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <button type="submit" className="btn-primary">
                   <span
                     className="
@@ -364,7 +373,7 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-              <p className="mt-8 text-center text-xs text-slate-400">
+              <p className="mt-5 text-center text-xs text-slate-400 md:mt-8">
                 © 2026 SportsStiks. All rights reserved.
               </p>
             </div>
