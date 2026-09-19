@@ -11,8 +11,6 @@ const Login = () => {
   const navigate = useNavigate();
 
   const [showPassword, setShowPassword] = useState(false);
-  const [rememberMe, setRememberMe] = useState(false);
-
   const [formData, setFormData] = useState({
     email: "",
     password: "",
