@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { login } from "../../store/auth/authSlice";
 import { users } from "../../utils";
-import {message} from "antd"
+import { message } from "antd";
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -313,26 +313,7 @@ const Login = () => {
                     </button>
                   </div>
                 </div>
-
-                {/* Forgot Password*/}
-                <div className="flex items-end justify-end">
-                  <button
-                    type="button"
-                    className="
-                      rounded-md
-                      px-1
-                      py-1
-                      text-sm
-                      font-semibold
-                      text-indigo-600
-                      transition-colors
-                      hover:text-indigo-700
-                    "
-                  >
-                    Forgot password?
-                  </button>
-                </div>
-
+                
                 <button type="submit" className="btn-primary">
                   <span
                     className="
@@ -354,6 +335,35 @@ const Login = () => {
               </form>
 
               {/* Footer */}
+              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 mt-2">
+                <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
+                  Demo Credentials
+                </p>
+
+                <div className="space-y-2">
+                  <div className="rounded-lg bg-white px-3 py-2.5 ring-1 ring-slate-100">
+                    <p className="mb-1 text-xs font-semibold text-slate-700">
+                      Admin
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      admin@sportstik.com
+                      <span className="mx-2 text-slate-300">|</span>
+                      admin123
+                    </p>
+                  </div>
+
+                  <div className="rounded-lg bg-white px-3 py-2.5 ring-1 ring-slate-100">
+                    <p className="mb-1 text-xs font-semibold text-slate-700">
+                      Support
+                    </p>
+                    <p className="text-xs text-slate-500">
+                      support@sportstik.com
+                      <span className="mx-2 text-slate-300">|</span>
+                      support123
+                    </p>
+                  </div>
+                </div>
+              </div>
               <p className="mt-8 text-center text-xs text-slate-400">
                 © 2026 SportsStiks. All rights reserved.
               </p>
